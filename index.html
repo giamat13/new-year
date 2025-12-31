@@ -309,7 +309,7 @@
     </div>
 
     <div class="interactive-hint">הזיזו את העכבר • לחצו למסיבה</div>
-    
+
     <script>
         const currentYear = new Date().getFullYear();
         const nextYear = currentYear + 1;
@@ -329,14 +329,6 @@
             sound.volume = Math.random() * 0.3 + 0.2; // עוצמה אקראית (0.2-0.5)
             sound.play().catch(e => console.log('שגיאה בהשמעת צליל:', e));
         }
-        const currentYear = new Date().getFullYear();
-        const nextYear = currentYear + 1;
-        const targetDate = new Date(`January 1, ${nextYear} 00:00:00`).getTime();
-        
-        document.getElementById('yearDisplay').textContent = nextYear;
-
-        let isCelebrating = false;
-        let isFinalCountdown = false;
 
         const card = document.getElementById('mainCard');
         document.addEventListener('mousemove', (e) => {
@@ -404,6 +396,7 @@
                 void bigDisplay.offsetWidth;
                 bigDisplay.classList.add('animate-pop');
                 createFirework(window.innerWidth/2, window.innerHeight/2, 0.8);
+                playConfettiSound(); // צליל בספירה לאחור
                 count--;
                 if (count < 0) {
                     clearInterval(timer);
@@ -471,6 +464,11 @@
             c.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
             document.body.appendChild(c);
             setTimeout(() => c.remove(), 5000);
+            
+            // השמעת צליל בהסתברות של 30%
+            if (Math.random() < 0.3) {
+                playConfettiSound();
+            }
         }
 
         function createEmojiRain() {
@@ -520,6 +518,7 @@
         window.addEventListener('mousedown', (e) => {
             createFirework(e.clientX, e.clientY, 1.2);
             for(let i=0; i<10; i++) createConfetti();
+            playConfettiSound(); // צליל בלחיצה
         });
 
         initStars();
