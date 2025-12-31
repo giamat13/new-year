@@ -309,8 +309,26 @@
     </div>
 
     <div class="interactive-hint">הזיזו את העכבר • לחצו למסיבה</div>
-
+    
     <script>
+        const currentYear = new Date().getFullYear();
+        const nextYear = currentYear + 1;
+        const targetDate = new Date(`January 1, ${nextYear} 00:00:00`).getTime();
+        
+        document.getElementById('yearDisplay').textContent = nextYear;
+
+        let isCelebrating = false;
+        let isFinalCountdown = false;
+
+        // יצירת אובייקט אודיו לקונפטי
+        const confettiSound = new Audio('confetti.mp3');
+        confettiSound.volume = 0.5; // עוצמת קול בינונית
+        
+        function playConfettiSound() {
+            const sound = confettiSound.cloneNode();
+            sound.volume = Math.random() * 0.3 + 0.2; // עוצמה אקראית (0.2-0.5)
+            sound.play().catch(e => console.log('שגיאה בהשמעת צליל:', e));
+        }
         const currentYear = new Date().getFullYear();
         const nextYear = currentYear + 1;
         const targetDate = new Date(`January 1, ${nextYear} 00:00:00`).getTime();
