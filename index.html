@@ -136,7 +136,6 @@
             transform-style: preserve-3d;
         }
 
-        /* פס זוהר מסביב לכרטיס */
         .container::before {
             content: '';
             position: absolute;
@@ -175,6 +174,30 @@
             margin-top: 20px;
             transform: translateZ(30px);
             text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        /* עיצוב כפתור גוגל */
+        .google-link {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 30px;
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--gold);
+            text-decoration: none;
+            border-radius: 50px;
+            border: 1px solid var(--gold);
+            font-weight: bold;
+            transition: all 0.3s ease;
+            transform: translateZ(60px);
+            cursor: pointer;
+            z-index: 100;
+        }
+
+        .google-link:hover {
+            background: var(--gold);
+            color: #000;
+            box-shadow: 0 0 20px var(--gold);
+            transform: translateZ(70px) scale(1.05);
         }
 
         /* ספירה לאחור ענקית */
@@ -245,14 +268,8 @@
         }
 
         @keyframes trailFade {
-            0% { 
-                transform: scale(1); 
-                opacity: 1; 
-            }
-            100% { 
-                transform: scale(0.2); 
-                opacity: 0; 
-            }
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(0.2); opacity: 0; }
         }
 
         @keyframes fall {
@@ -267,7 +284,6 @@
 </head>
 <body>
 
-    <!-- צורות רקע -->
     <div class="ambient-shape shape-1"></div>
     <div class="ambient-shape shape-2"></div>
     <div class="ambient-shape shape-3"></div>
@@ -285,30 +301,30 @@
         <h1 id="titleText">ההכנות בעיצומן...</h1>
         <div class="year" id="yearDisplay">----</div>
         <p class="message" id="msgText">מתכוננים לרגע המיוחד</p>
+        
+        <a href="https://www.google.com/search?q=%D7%A2%D7%A8%D7%91+%D7%94%D7%A9%D7%A0%D7%94+%D7%94%D7%90%D7%96%D7%A8%D7%97%D7%99%D7%AA+%D7%94%D7%97%D7%93%D7%A9%D7%94&oi=ddle&noiga=1" 
+           class="google-link" target="_blank">
+            קישור לחגיגות של גוגל ✨
+        </a>
     </div>
 
     <div class="interactive-hint">הזיזו את העכבר • לחצו למסיבה</div>
 
     <script>
-        // חישוב אוטומטי של השנה הבאה למסיבה
         const currentYear = new Date().getFullYear();
         const nextYear = currentYear + 1;
         const targetDate = new Date(`January 1, ${nextYear} 00:00:00`).getTime();
         
-        // עדכון תצוגת השנה
         document.getElementById('yearDisplay').textContent = nextYear;
 
         let isCelebrating = false;
         let isFinalCountdown = false;
 
-        // אפקט תלת מימד לכרטיס
         const card = document.getElementById('mainCard');
         document.addEventListener('mousemove', (e) => {
             if (isFinalCountdown) return;
-            
             const xAxis = (window.innerWidth / 2 - e.pageX) / 30;
             const yAxis = (window.innerHeight / 2 - e.pageY) / 30;
-            
             requestAnimationFrame(() => {
                 card.style.transform = `rotateY(${xAxis}deg) rotateX(${yAxis}deg)`;
             });
@@ -318,43 +334,31 @@
             card.style.transform = `rotateY(0deg) rotateX(0deg)`;
         });
 
-        // יצירת כוכבים משופרת
         function initStars() {
             for (let i = 0; i < 200; i++) {
                 const star = document.createElement('div');
                 star.className = 'star';
                 star.style.left = Math.random() * 100 + 'vw';
                 star.style.top = Math.random() * 100 + 'vh';
-                
                 const size = Math.random() * 2 + 1;
                 star.style.width = size + 'px';
                 star.style.height = size + 'px';
                 star.style.opacity = Math.random() * 0.7 + 0.3;
-                
                 star.style.animation = `twinkle ${Math.random() * 3 + 2}s infinite alternate`;
-                
                 document.body.appendChild(star);
             }
-            
             const style = document.createElement('style');
-            style.innerHTML = `
-                @keyframes twinkle {
-                    0% { opacity: 0.3; transform: scale(0.8); }
-                    100% { opacity: 1; transform: scale(1.2); }
-                }
-            `;
+            style.innerHTML = `@keyframes twinkle { 0% { opacity: 0.3; transform: scale(0.8); } 100% { opacity: 1; transform: scale(1.2); } }`;
             document.head.appendChild(style);
         }
 
         function updateTimers() {
             const now = new Date().getTime();
             const diff = targetDate - now;
-
             if (diff <= 0) {
                 if (!isCelebrating) startCelebration();
                 return;
             }
-
             const days = Math.floor(diff / (1000 * 60 * 60 * 24));
             const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
@@ -365,29 +369,23 @@
             document.getElementById('m').textContent = String(mins).padStart(2, '0');
             document.getElementById('s').textContent = String(secs).padStart(2, '0');
 
-            if (diff <= 10500 && !isFinalCountdown) {
-                triggerFinalCountdown();
-            }
+            if (diff <= 10500 && !isFinalCountdown) triggerFinalCountdown();
         }
 
         function triggerFinalCountdown() {
             isFinalCountdown = true;
             const bigDisplay = document.getElementById('bigCountdown');
-            
             card.style.opacity = '0';
-            card.style.transform = 'scale(0.8) translateZ(-100px)';
+            card.style.pointerEvents = 'none';
             bigDisplay.style.display = 'block';
             document.getElementById('miniTimer').style.opacity = '0';
-
             let count = 10;
             const timer = setInterval(() => {
                 bigDisplay.textContent = count;
                 bigDisplay.classList.remove('animate-pop');
                 void bigDisplay.offsetWidth;
                 bigDisplay.classList.add('animate-pop');
-                
                 createFirework(window.innerWidth/2, window.innerHeight/2, 0.8);
-
                 count--;
                 if (count < 0) {
                     clearInterval(timer);
@@ -397,17 +395,8 @@
             }, 1000);
         }
 
-        const greetings = [
-            `🎉 שנה חדשה שמחה! 🎊`,
-            "Happy New Year! 🎆",
-            "Feliz Año Nuevo! 🥂",
-            "Bonne Année! 🎈",
-            "Frohes Neues Jahr! 🎩",
-            "С Новым Годом! ❄️",
-            "Sana Hilwa! 🌙"
-        ];
+        const greetings = [`🎉 שנה חדשה שמחה! 🎊`, "Happy New Year! 🎆", "Feliz Año Nuevo! 🥂", "Bonne Année! 🎈", "Frohes Neues Jahr! 🎩", "С Новым Годом! ❄️", "Sana Hilwa! 🌙"];
         let langIndex = 0;
-
         function cycleLanguages() {
             langIndex = (langIndex + 1) % greetings.length;
             document.getElementById('titleText').textContent = greetings[langIndex];
@@ -416,20 +405,14 @@
         function startCelebration() {
             if (isCelebrating) return;
             isCelebrating = true;
-
             document.getElementById('titleText').textContent = greetings[0];
             document.getElementById('yearDisplay').textContent = nextYear;
             document.getElementById('msgText').textContent = "שתהיה לכם שנה של הגשמה, אושר והמון רגעים קסומים!";
-            
             card.style.opacity = '1';
-            card.style.transform = 'scale(1) rotateY(0deg) rotateX(0deg)';
-            
+            card.style.pointerEvents = 'auto';
             setInterval(cycleLanguages, 3000);
-
             setInterval(() => createFirework(Math.random() * window.innerWidth, Math.random() * window.innerHeight * 0.8), 500);
-            setInterval(() => {
-                for(let i=0; i<8; i++) createConfetti();
-            }, 150);
+            setInterval(() => { for(let i=0; i<8; i++) createConfetti(); }, 150);
             setInterval(createEmojiRain, 400);
             setInterval(createBalloon, 1200);
         }
@@ -438,7 +421,6 @@
             const colors = ['#FFD700', '#FF4500', '#FF1493', '#00BFFF', '#7CFC00', '#FFFFFF', '#bc13fe'];
             const particles = 40;
             const color = colors[Math.floor(Math.random() * colors.length)];
-
             for (let i = 0; i < particles; i++) {
                 const p = document.createElement('div');
                 p.className = 'firework';
@@ -449,13 +431,11 @@
                 p.style.height = p.style.width;
                 p.style.borderRadius = '50%';
                 p.style.boxShadow = `0 0 10px ${color}`;
-                
                 const angle = (Math.PI * 2 * i) / particles;
                 const velocity = (Math.random() * 120 + 60) * scale;
                 p.style.setProperty('--tx', Math.cos(angle) * velocity + 'px');
                 p.style.setProperty('--ty', Math.sin(angle) * velocity + 'px');
                 p.style.animation = 'explode 1s cubic-bezier(0,0,0.2,1) forwards';
-                
                 document.body.appendChild(p);
                 setTimeout(() => p.remove(), 1000);
             }
@@ -470,7 +450,6 @@
             c.style.background = colors[Math.floor(Math.random() * colors.length)];
             c.style.width = Math.random() * 12 + 6 + 'px';
             c.style.height = Math.random() * 12 + 6 + 'px';
-            c.style.transform = `rotate(${Math.random() * 360}deg)`;
             c.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
             document.body.appendChild(c);
             setTimeout(() => c.remove(), 5000);
@@ -501,30 +480,21 @@
             b.style.transition = 'transform 6s linear';
             b.style.zIndex = '5';
             document.body.appendChild(b);
-            
-            setTimeout(() => {
-                b.style.transform = `translateY(-${window.innerHeight + 200}px) rotate(${Math.random() * 40 - 20}deg)`;
-            }, 100);
+            setTimeout(() => { b.style.transform = `translateY(-${window.innerHeight + 200}px) rotate(${Math.random() * 40 - 20}deg)`; }, 100);
             setTimeout(() => b.remove(), 7000);
         }
 
-        // שובל עכבר
         let lastTrailTime = 0;
         document.addEventListener('mousemove', (e) => {
             const now = Date.now();
             if (now - lastTrailTime < 20) return;
             lastTrailTime = now;
-            
             const trail = document.createElement('div');
             trail.className = 'mouse-trail';
             trail.style.left = (e.clientX - 10) + 'px';
             trail.style.top = (e.clientY - 10) + 'px';
-            
-            // צבעים משתנים
             const hue = (Date.now() / 10) % 360;
             trail.style.background = `radial-gradient(circle, hsla(${hue}, 100%, 60%, 0.8), hsla(${hue}, 100%, 60%, 0))`;
-            trail.style.boxShadow = `0 0 20px hsla(${hue}, 100%, 60%, 0.6), 0 0 40px hsla(${(hue + 180) % 360}, 100%, 60%, 0.4)`;
-            
             document.body.appendChild(trail);
             setTimeout(() => trail.remove(), 600);
         });
@@ -537,8 +507,7 @@
         initStars();
         setInterval(updateTimers, 1000);
         updateTimers();
-
     </script>
-כל הזכויות שמורות © Itamar Furst 2025
+    <div style="position: fixed; bottom: 10px; left: 10px; font-size: 10px; opacity: 0.5;">כל הזכויות שמורות © Itamar Furst 2025</div>
 </body>
 </html>
