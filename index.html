@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>חגיגות שנה חדשה דינמיות</title>
+    <style>
+        :root {
+            --gold: #ffd700;
+            --white: #ffffff;
+            --bg-gradient: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--bg-gradient);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: var(--white);
+        }
+
+        /* ספירה לאחור תמידית קטנה */
+        .mini-timer {
+            position: fixed;
+            top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            gap: 15px;
+            font-size: 1.2rem;
+            z-index: 1000;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .timer-unit {
+            text-align: center;
+        }
+
+        .timer-unit span {
+            display: block;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            color: var(--gold);
+        }
+
+        .container {
+            text-align: center;
+            z-index: 10;
+            padding: 40px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 40px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.8s ease;
+            max-width: 90%;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 8vw, 4rem);
+            margin-bottom: 20px;
+            background: linear-gradient(to bottom, #fff, #ccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        }
+
+        .year {
+            font-size: clamp(4rem, 15vw, 8rem);
+            color: var(--gold);
+            font-weight: 900;
+            line-height: 1;
+            margin: 20px 0;
+            filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.5));
+        }
+
+        .message {
+            font-size: clamp(1rem, 4vw, 1.8rem);
+            opacity: 0.9;
+        }
+
+        /* ספירה לאחור ענקית */
+        .big-countdown {
+            position: fixed;
+            font-size: 25rem;
+            font-weight: 900;
+            color: var(--gold);
+            display: none;
+            z-index: 2000;
+            text-shadow: 0 0 50px rgba(255, 215, 0, 0.8);
+            pointer-events: none;
+        }
+
+        .animate-pop {
+            animation: popIn 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* אלמנטים צפים */
+        .firework, .confetti, .balloon, .star, .sparkle {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .star {
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.5;
+        }
+
+        .interactive-hint {
+            position: fixed;
+            bottom: 20px;
+            font-size: 0.9rem;
+            opacity: 0.6;
+            letter-spacing: 1px;
+        }
+
+        @keyframes fall {
+            to { transform: translateY(110vh) rotate(720deg); }
+        }
+
+        @keyframes explode {
+            to { transform: translate(var(--tx), var(--ty)); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="mini-timer" id="miniTimer">
+        <div class="timer-unit"><div id="d">00</div><span>ימים</span></div>
+        <div class="timer-unit"><div id="h">00</div><span>שעות</span></div>
+        <div class="timer-unit"><div id="m">00</div><span>דקות</span></div>
+        <div class="timer-unit"><div id="s">00</div><span>שניות</span></div>
+    </div>
+
+    <div class="big-countdown" id="bigCountdown"></div>
+
+    <div class="container" id="mainCard">
+        <h1 id="titleText">ההכנות בעיצומן...</h1>
+        <div class="year" id="yearDisplay">----</div>
+        <p class="message" id="msgText">מתכוננים לרגע המיוחד</p>
+    </div>
+
+    <div class="interactive-hint">לחצו בכל מקום למסך לזיקוקים ✨</div>
+
+    <script>
+        // חישוב אוטומטי של השנה הבאה
+        const currentYear = new Date().getFullYear();
+        const nextYear = currentYear + 1;
+        const targetDate = new Date(`January 1, ${nextYear} 00:00:00`).getTime();
+        
+        // עדכון תצוגת השנה הראשונית
+        document.getElementById('yearDisplay').textContent = currentYear;
+
+        let isCelebrating = false;
+        let isFinalCountdown = false;
+
+        // יצירת כוכבים רקע
+        function initStars() {
+            for (let i = 0; i < 150; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.opacity = Math.random();
+                document.body.appendChild(star);
+            }
+        }
+
+        function updateTimers() {
+            const now = new Date().getTime();
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                if (!isCelebrating) startCelebration();
+                return;
+            }
+
+            // ספירה לאחור קטנה
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((diff % (1000 * 60)) / 1000);
+
+            document.getElementById('d').textContent = String(days).padStart(2, '0');
+            document.getElementById('h').textContent = String(hours).padStart(2, '0');
+            document.getElementById('m').textContent = String(mins).padStart(2, '0');
+            document.getElementById('s').textContent = String(secs).padStart(2, '0');
+
+            // הפעלת ספירה סופית (10 שניות לחצות)
+            if (diff <= 10500 && !isFinalCountdown) {
+                triggerFinalCountdown();
+            }
+        }
+
+        function triggerFinalCountdown() {
+            isFinalCountdown = true;
+            const bigDisplay = document.getElementById('bigCountdown');
+            const mainCard = document.getElementById('mainCard');
+            
+            mainCard.style.opacity = '0';
+            mainCard.style.transform = 'scale(0.8)';
+            bigDisplay.style.display = 'block';
+
+            let count = 10;
+            const timer = setInterval(() => {
+                bigDisplay.textContent = count;
+                bigDisplay.classList.remove('animate-pop');
+                void bigDisplay.offsetWidth; // Force reflow
+                bigDisplay.classList.add('animate-pop');
+                
+                // אפקט קטן בכל ספרה
+                createFirework(window.innerWidth/2, window.innerHeight/2, 0.5);
+
+                count--;
+                if (count < 0) {
+                    clearInterval(timer);
+                    bigDisplay.style.display = 'none';
+                    startCelebration();
+                }
+            }, 1000);
+        }
+
+        function startCelebration() {
+            if (isCelebrating) return;
+            isCelebrating = true;
+
+            // עדכון הממשק לשנה החדשה
+            document.getElementById('titleText').textContent = "🎉 שנה חדשה שמחה! 🎊";
+            document.getElementById('yearDisplay').textContent = nextYear;
+            document.getElementById('msgText').textContent = "מאחלים לכם שנה של הגשמה, אושר והמון רגעים קסומים!";
+            document.getElementById('mainCard').style.opacity = '1';
+            document.getElementById('mainCard').style.transform = 'scale(1)';
+            document.getElementById('miniTimer').style.display = 'none';
+
+            // לולאות אפקטים
+            setInterval(() => createFirework(Math.random() * window.innerWidth, Math.random() * window.innerHeight), 600);
+            setInterval(() => {
+                for(let i=0; i<5; i++) createConfetti();
+            }, 200);
+            setInterval(createBalloon, 1500);
+        }
+
+        // פונקציות עזר לאפקטים (מותאמות לביצועים)
+        function createFirework(x, y, scale = 1) {
+            const colors = ['#FFD700', '#FF4500', '#FF1493', '#00BFFF', '#7CFC00', '#FFFFFF'];
+            const particles = 30;
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            for (let i = 0; i < particles; i++) {
+                const p = document.createElement('div');
+                p.className = 'firework';
+                p.style.left = x + 'px';
+                p.style.top = y + 'px';
+                p.style.background = color;
+                p.style.width = '4px';
+                p.style.height = '4px';
+                p.style.borderRadius = '50%';
+                
+                const angle = (Math.PI * 2 * i) / particles;
+                const velocity = (Math.random() * 100 + 50) * scale;
+                p.style.setProperty('--tx', Math.cos(angle) * velocity + 'px');
+                p.style.setProperty('--ty', Math.sin(angle) * velocity + 'px');
+                p.style.animation = 'explode 0.8s ease-out forwards';
+                
+                document.body.appendChild(p);
+                setTimeout(() => p.remove(), 800);
+            }
+        }
+
+        function createConfetti() {
+            const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff', '#ffd700'];
+            const c = document.createElement('div');
+            c.className = 'confetti';
+            c.style.left = Math.random() * 100 + 'vw';
+            c.style.top = '-20px';
+            c.style.background = colors[Math.floor(Math.random() * colors.length)];
+            c.style.width = Math.random() * 10 + 5 + 'px';
+            c.style.height = Math.random() * 10 + 5 + 'px';
+            c.style.animation = `fall ${Math.random() * 3 + 2}s linear forwards`;
+            document.body.appendChild(c);
+            setTimeout(() => c.remove(), 5000);
+        }
+
+        function createBalloon() {
+            const b = document.createElement('div');
+            b.style.position = 'absolute';
+            b.style.bottom = '-100px';
+            b.style.left = Math.random() * 90 + 'vw';
+            b.style.width = '50px';
+            b.style.height = '70px';
+            b.style.background = `hsl(${Math.random() * 360}, 70%, 60%)`;
+            b.style.borderRadius = '50% 50% 50% 50% / 60% 60% 40% 40%';
+            b.style.transition = 'transform 6s linear';
+            b.style.zIndex = '5';
+            document.body.appendChild(b);
+            
+            setTimeout(() => {
+                b.style.transform = `translateY(-${window.innerHeight + 200}px) rotate(${Math.random() * 40 - 20}deg)`;
+            }, 100);
+            setTimeout(() => b.remove(), 7000);
+        }
+
+        // אינטראקציה
+        window.addEventListener('mousedown', (e) => {
+            createFirework(e.clientX, e.clientY, 1.2);
+            for(let i=0; i<10; i++) createConfetti();
+        });
+
+        // אתחול
+        initStars();
+        setInterval(updateTimers, 1000);
+        updateTimers();
+
+    </script>
+</body>
+</html>
