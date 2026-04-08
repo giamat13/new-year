@@ -20,11 +20,6 @@
 * **CSS3** (Animations, Glassmorphism, Variables)
 * **Vanilla JavaScript** (DOM Manipulation, Particle Systems)
 
-## 📦 התקנה והרצה
-1. שמור את הקוד כקובץ `index.html`.
-2. וודא שקיים קובץ סאונד בשם `confetti.mp3` באותה התיקייה לחוויה מלאה.
-3. פתח את הקובץ בדפדפן.
-
 ## 🤝 קרדיטים ותרומה
 * **פיתוח ועיצוב:** (Giamat13).
 * **Issues ו-Pull Requests:** כלל התורמים לפרויקט.
